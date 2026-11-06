@@ -1,0 +1,31 @@
+services:
+  songloft:
+    image: songloft/songloft:2.13.8@sha256:2d404904dab32db885cff1c199cf0702b3e30b81c4ab32b7bea6cea36a076010
+    restart: unless-stopped
+    init: true
+    ports:
+      - '127.0.0.1:58091:58091'
+    environment:
+      TZ: Asia/Shanghai
+      ADMIN_USERNAME: admin
+      ADMIN_PASSWORD: ${SONGLOFT_ADMIN_PASSWORD:?Missing local admin password}
+      PUID: '1000'
+      PGID: '1000'
+      HTTP_PROXY: ''
+      HTTPS_PROXY: ''
+      ALL_PROXY: ''
+      http_proxy: ''
+      https_proxy: ''
+      all_proxy: ''
+      NO_PROXY: 'localhost,127.0.0.1,mimusictracely.hanxi.cc'
+      no_proxy: 'localhost,127.0.0.1,mimusictracely.hanxi.cc'
+    extra_hosts:
+      - 'mimusictracely.hanxi.cc:127.0.0.1'
+    volumes:
+      - ./songloft-local-music:/app/music
+      - ./songloft-local-data:/app/data
+    logging:
+      driver: json-file
+      options:
+        max-size: '5m'
+        max-file: '3'

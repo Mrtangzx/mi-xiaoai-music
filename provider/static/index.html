@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>家里的音乐 · 免费曲库助手</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+<main>
+  <header><span class="badge">家里的音乐</span><h1>把喜欢的音乐，留在家里。</h1>
+    <p>搜索开放授权录音，保存到家庭服务器，再用小爱同学点播。</p></header>
+  <section id="login-panel" class="panel">
+    <h2>连接你的曲库</h2>
+    <form id="login-form" novalidate><label for="token">曲库助手访问密钥（相当于本地密码）</label>
+      <div class="row"><input id="token" type="password" autocomplete="off" required placeholder="双击 open-music.bat 后，在这里按 Ctrl+V 粘贴"><button id="connect-button" type="submit">连接</button></div>
+    </form>
+    <p class="small">在部署文件夹中双击 open-music.bat，会安全复制访问密钥；回到这里按 Ctrl+V，再点“连接”。密钥不要发到聊天里。这不是 Songloft 管理员密码。</p>
+    <p id="login-feedback" class="small" role="status" aria-live="polite"></p>
+  </section>
+  <section id="workspace" hidden>
+    <div class="toolbar"><span>已连接家庭曲库</span><button id="logout" class="quiet">退出</button></div>
+    <section class="panel">
+      <h2>找一首音乐</h2>
+      <form id="search-form"><label for="keyword">歌名或作品名</label>
+        <div class="row"><input id="keyword" maxlength="160" placeholder="试试：致爱丽丝、小星星，或英文曲名" required><button id="search-button">搜索</button></div>
+      </form>
+      <p class="small">当前音源：Wikimedia Commons。仅自动接收授权清楚的 CC0、CC BY、CC BY-SA 录音。搜索结果可能包含不同演奏版本，请核对来源后保存，保存完成即可试听。</p>
+      <div id="results" class="cards"></div>
+    </section>
+    <section class="panel"><div class="section-heading"><h2>已加入的音乐</h2><button id="refresh" class="quiet">刷新状态</button></div>
+      <p class="small">“已保存”表示 MP3 已落盘并通过校验。正在保存时，请等待状态完成后再验证断网播放。保存完成后会自动登记到 Songloft 曲库及配置的歌单。“已保存”和“已同步”分开显示。</p>
+      <div id="library" class="cards"></div>
+      <button id="load-more" class="quiet" hidden>加载更多音乐</button>
+    </section>
+  </section>
+  <p id="message" role="status" aria-live="polite"></p>
+  <footer>服务器保存 MP3 和作者、来源、许可信息。请定期备份。小爱语音识别仍需要小米云端服务。</footer>
+</main>
+</body>
+</html>

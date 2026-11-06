@@ -1,0 +1,73 @@
+name: home-music
+
+services:
+  songloft:
+    image: ${SONGLOFT_IMAGE:?Run python3 setup.py first}
+    restart: unless-stopped
+    init: true
+    ports:
+      - "${LAN_IP:?Set LAN_IP}:${SONGLOFT_PORT:-58091}:58091"
+    environment:
+      TZ: Asia/Shanghai
+      ADMIN_USERNAME: ${SONGLOFT_ADMIN_USERNAME:-admin}
+      ADMIN_PASSWORD: ${SONGLOFT_ADMIN_PASSWORD:?Set a strong admin password}
+      PUID: ${HOME_MUSIC_UID:?Set HOME_MUSIC_UID}
+      PGID: ${HOME_MUSIC_GID:?Set HOME_MUSIC_GID}
+      # The upstream release enables Tracely at build time. Keep the known
+      # telemetry endpoint inside this container; do not send it to a proxy.
+      HTTP_PROXY: ""
+      HTTPS_PROXY: ""
+      ALL_PROXY: ""
+      http_proxy: ""
+      https_proxy: ""
+      all_proxy: ""
+      NO_PROXY: "localhost,127.0.0.1,mimusictracely.hanxi.cc,free-music"
+      no_proxy: "localhost,127.0.0.1,mimusictracely.hanxi.cc,free-music"
+    extra_hosts:
+      - "mimusictracely.hanxi.cc:127.0.0.1"
+    volumes:
+      - ./music:/app/music
+      - ./songloft-data:/app/data
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
+
+  free-music:
+    # Send only application source to the build daemon, never .env or the music library.
+    build:
+      context: ./provider
+      dockerfile: ../Dockerfile
+    image: home-music-provider:0.2.0
+    restart: unless-stopped
+    init: true
+    user: "${HOME_MUSIC_UID:?Set HOME_MUSIC_UID}:${HOME_MUSIC_GID:?Set HOME_MUSIC_GID}"
+    ports:
+      - "${LAN_IP:?Set LAN_IP}:${FREE_MUSIC_PORT:-58092}:8080"
+    environment:
+      TZ: Asia/Shanghai
+      HOME_MUSIC_BIND_HOST: 0.0.0.0
+      HOME_MUSIC_PORT: "8080"
+      HOME_MUSIC_PUBLIC_URL: ${HOME_MUSIC_PUBLIC_URL:?Set the LAN media URL}
+      HOME_MUSIC_TOKEN: ${HOME_MUSIC_TOKEN:?Set a strong provider token}
+      HOME_MUSIC_ROOT: /data/audio
+      HOME_MUSIC_DATA: /data
+      HOME_MUSIC_SONGLOFT_URL: http://songloft:58091
+      HOME_MUSIC_SONGLOFT_USERNAME: ${SONGLOFT_ADMIN_USERNAME:-admin}
+      HOME_MUSIC_SONGLOFT_PASSWORD: ${SONGLOFT_ADMIN_PASSWORD:?Set a strong admin password}
+      HOME_MUSIC_MAX_LIBRARY_MB: ${HOME_MUSIC_MAX_LIBRARY_MB:-5120}
+    volumes:
+      - ./provider-data:/data
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=256m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
